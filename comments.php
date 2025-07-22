@@ -1,13 +1,13 @@
 <?php
 /**
- * The template for displaying comments.
+ * The template for displaying comments
  *
  * This is the template that displays the area of the page that contains both the current comments
  * and the comment form.
  *
  * @link https://codex.wordpress.org/Template_Hierarchy
  *
- * @package Shapely
+ * @version unapp 1.0
  */
 
 /*
@@ -18,73 +18,58 @@
 if ( post_password_required() ) {
 	return;
 }
+
+$arg = array(
+'status'    => 'approve'
+);
+$comments_query = new WP_Comment_Query( $arg );
 ?>
 
-<div id="comments" class="comments-area comments  nolist">
-	<?php
-	// You can start editing here -- including this comment!
-	if ( have_comments() ) : ?>
-		<h5 class="comments-title">
-			<?php
-				printf( // WPCS: XSS OK.
-					esc_html( _nx( '1 COMMENT', '%1$s COMMENTS', get_comments_number(), 'comments title', 'shapely' ) ),
-					number_format_i18n( get_comments_number() )
+
+    <div class="section-padding-top">
+		<?php if(get_comments_number() > 0 ): ?>
+            <div class="section-wrapper">
+
+                <div class="comment-area">
+                    <h4 class="title"><?php esc_html_e( 'Comments', 'unapp' ); ?> ( <?php print number_format_i18n(get_comments_number() ); ?> )</h4>
+                    <ul class="comments">
+						<?php
+						if( number_format_i18n( get_comments_number() ) > 0 ):
+							wp_list_comments( array(
+								'style'       => 'ul',
+								'callback'    => 'unapp_comment_list',
+								'short_ping'  => true
+							) );
+						endif;
+						?>
+                    </ul>
+                    <div class="nav-links">
+						<?php paginate_comments_links( array('type' => 'list' ) ); ?>
+                    </div>
+                </div>
+
+            </div>
+		<?php endif; ?>
+        <div class="section-wrapper">
+            <div class="write-comment">
+				<?php
+				$commenter = wp_get_current_commenter();
+				$req = get_option( 'require_name_email' );
+				$aria_req = ($req ? " aria-required='true' " : '');
+				$required_text = ' ';
+
+				$comment_form_arg = array(
+					'class_submit'  => 'button',
+					'label_submit'  => esc_html__( 'Submit', 'unapp' ),
+					'title_reply'   => esc_html__( 'Leave a Comments', 'unapp' ),
+					'fields'        => apply_filters( 'comment_form_default_fields', array(
+						'author'    => '<div class="row"><div class="col-xs-6"><div class="form-group"><input type="text"' . $aria_req . ' name="author" class="form-control" placeholder="Name*" value="'.esc_attr( $commenter['comment_author'] ).'"></div></div>',
+						'email'    => '<div class="col-xs-6"><div class="form-group"><input type="email"' . $aria_req . ' name="email" class="form-control" placeholder="Email*" value="'.esc_attr(  $commenter['comment_author_email'] ).'"></div></div></div>'
+					) ),
+					'comment_field' => '<div class="form-group"><textarea name="comment" rows="7" class="form-control" placeholder="Comment*"></textarea></div>',
 				);
-			?>
-		</h5>
-
-		<?php if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) : // Are there comments to navigate through? ?>
-		<nav id="comment-nav-above" class="navigation comment-navigation" role="navigation">
-			<h2 class="screen-reader-text"><?php esc_html_e( 'Comment navigation', 'shapely' ); ?></h2>
-			<div class="nav-links">
-
-				<div class="nav-previous"><?php previous_comments_link( esc_html__( 'Older Comments', 'shapely' ) ); ?></div>
-				<div class="nav-next"><?php next_comments_link( esc_html__( 'Newer Comments', 'shapely' ) ); ?></div>
-
-			</div><!-- .nav-links -->
-		</nav><!-- #comment-nav-above -->
-		<?php endif; // Check for comment navigation. ?>
-
-        <?php add_filter('comment_reply_link', 'shapely_reply_link_class'); ?>
-		<ul class="comments-list">
-			<?php
-				wp_list_comments( array(
-					'style'      => 'ol',
-					'short_ping' => true,
-					'avatar_size'=> 75,
-					'callback'   => 'shapely_cb_comment'
-				) );
-			?>
-		</ul><!-- .comment-list -->
-        <?php remove_filter('comment_reply_link', 'shapely_reply_link_class'); ?>
-
-
-		<?php if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) : // Are there comments to navigate through? ?>
-		<nav id="comment-nav-below" class="navigation comment-navigation" role="navigation">
-			<h2 class="screen-reader-text"><?php esc_html_e( 'Comment navigation', 'shapely' ); ?></h2>
-			<div class="nav-links">
-
-				<div class="nav-previous"><?php previous_comments_link( esc_html__( 'Older Comments', 'shapely' ) ); ?></div>
-				<div class="nav-next"><?php next_comments_link( esc_html__( 'Newer Comments', 'shapely' ) ); ?></div>
-
-			</div><!-- .nav-links -->
-		</nav><!-- #comment-nav-below -->
-		<?php
-		endif; // Check for comment navigation.
-
-	endif; // Check for have_comments().
-
-
-	// If comments are closed and there are comments, let's leave a little note, shall we?
-	if ( ! comments_open() && get_comments_number() && post_type_supports( get_post_type(), 'comments' ) ) : ?>
-
-		<p class="no-comments"><?php esc_html_e( 'Comments are closed.', 'shapely' ); ?></p>
-	<?php
-	endif;
-
-    /* comment form */
-    $comments_args = shapely_custom_comment_form();
-	comment_form($comments_args);
-	?>
-
-</div><!-- #comments -->
+				comment_form( $comment_form_arg );
+				?>
+            </div>
+        </div>
+    </div>

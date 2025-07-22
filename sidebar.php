@@ -1,18 +1,15 @@
 <?php
 /**
- * The sidebar containing the main widget area.
+ * The sidebar containing the main widget area
  *
- * @link    https://developer.wordpress.org/themes/basics/template-files/#template-partials
+ * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
  *
- * @package Shapely
- */ ?>
+ * @since unapp 1.0
+ */
 
-<?php
-if ( ! is_active_sidebar( 'sidebar-1' ) || ! shapely_show_sidebar() ) {
-	return;
+if ( is_active_sidebar( 'sidebar-1' ) ) {
+    dynamic_sidebar( 'sidebar-1' );
 }
 ?>
 
-<aside id="secondary" class="widget-area col-md-4 hidden-sm" role="complementary">
-	<?php dynamic_sidebar( 'sidebar-1' ); ?>
-</aside><!-- #secondary -->
+

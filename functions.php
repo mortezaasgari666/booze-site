@@ -1,322 +1,276 @@
 <?php
+/**
+ * unapp functions and definitions
+ *
+ * Set up the theme and provides some helper functions, which are used in the
+ * theme as custom template tags. Others are attached to action and filter
+ * hooks in WordPress to change core functionality.
+ *
+ * @link https://codex.wordpress.org/Theme_Development
+ *
+ * Functions that are not pluggable (not wrapped in function_exists()) are
+ * instead attached to a filter or action hook.
+ *
+ * For more information on hooks, actions, and filters,
+ * {@link https://codex.wordpress.org/Plugin_API}
+ *
+ * @since unapp 1.0
+ */
 
 /**
- * Shapely functions and definitions.
- *
- * @link    https://developer.wordpress.org/themes/basics/theme-functions/
- *
- * @package Shapely
+ * unapp only works in WordPress version 4.9.6 or later
  */
-if ( ! function_exists( 'shapely_setup' ) ) :
+
+if( ! function_exists( 'unapp_setup' ) ) {
 	/**
 	 * Sets up theme defaults and registers support for various WordPress features.
 	 *
 	 * Note that this function is hooked into the after_setup_theme hook, which
 	 * runs before the init hook. The init hook is too late for some features, such
 	 * as indicating support for post thumbnails.
+	 *
+	 * Create your own unapp_setup() function to override in a child theme.
+	 *
+	 * @since unapp 1.0
 	 */
-	function shapely_setup() {
+	function unapp_setup() {
 		/*
 		 * Make theme available for translation.
 		 * Translations can be filed in the /languages/ directory.
-		 * If you're building a theme based on Shapely, use a find and replace
-		 * to change 'shapely' to the name of your theme in all the template files.
+		 * If you're building a theme based on unapp, use a find and replace
+		 * to change 'unapp' to the name of your theme in all the template files.
 		 */
-		load_theme_textdomain( 'shapely', get_template_directory() . '/languages' );
+		load_theme_textdomain( 'unapp' );
 
 		// Add default posts and comments RSS feed links to head.
 		add_theme_support( 'automatic-feed-links' );
 
-		/**
-		 * Add support for the custom logo functionality
-		 */
-		add_theme_support( 'custom-logo', array(
-			'height'     => 55,
-			'width'      => 135,
-			'flex-width' => true,
-		) );
-
-		add_theme_support( 'custom-header', apply_filters( 'shapely_custom_header_args', array(
-			'default-image'      => '',
-			'default-text-color' => '000000',
-			'width'              => 1900,
-			'height'             => 225,
-			'flex-width'         => true
-		) ) );
-
-		/*
+		 /*
 		 * Let WordPress manage the document title.
 		 * By adding theme support, we declare that this theme does not use a
 		 * hard-coded <title> tag in the document head, and expect WordPress to
 		 * provide it for us.
 		 */
 		add_theme_support( 'title-tag' );
+		add_theme_support( 'custom-header' );
+		add_theme_support( 'custom-background' );
 
 		/*
 		 * Enable support for Post Thumbnails on posts and pages.
 		 *
-		 * @link https://developer.wordpress.org/themes/functionality/featured-images-post-thumbnails/
+		 * @link https://codex.wordpress.org/Function_Reference/add_theme_support#Post_Thumbnails
 		 */
 		add_theme_support( 'post-thumbnails' );
+		add_image_size( 'unapp-post-thumb', 680, 470, true );
+		add_image_size( 'unapp-portfolio-thumb', 360, 270, true );
+		add_image_size( 'unapp-portfolio-big', 570, 450, true );
+		add_image_size( 'unapp-footer-blog', 70, 60, true );
 
-		// This theme uses wp_nav_menu() in one location.
+		// This theme uses wp_nav_menu() in two locations.
 		register_nav_menus( array(
-			                    'primary'     => esc_html__( 'Primary', 'shapely' ),
-			                    'social-menu' => esc_html__( 'Social Menu', 'shapely' ),
-		                    ) );
+			'header_menu' => esc_html__( 'Header Menu', 'unapp' ),
+			'footer_menu'  => esc_html__( 'Footer Menu', 'unapp' ),
+		) );
 
 		/*
 		 * Switch default core markup for search form, comment form, and comments
 		 * to output valid HTML5.
 		 */
 		add_theme_support( 'html5', array(
-			'search-form',
 			'comment-form',
 			'comment-list',
 			'gallery',
 			'caption',
 		) );
 
-		// Set up the WordPress core custom background feature.
-		add_theme_support( 'custom-background', apply_filters( 'shapely_custom_background_args', array(
-			'default-color' => 'ffffff',
-			'default-image' => '',
-		) ) );
-
-		/**
-		 * Enable support for Post Thumbnails on posts and pages.
+		/*
+		 * Enable support for Post Formats.
 		 *
-		 * @link http://codex.wordpress.org/Function_Reference/add_theme_support#Post_Thumbnails
+		 * See: https://codex.wordpress.org/Post_Formats
 		 */
-		add_theme_support( 'post-thumbnails' );
-		add_image_size( 'shapely-full', 1110, 530, true );
-		add_image_size( 'shapely-featured', 730, 350, true );
-		add_image_size( 'shapely-grid', 350, 300, true );
+		add_theme_support( 'post-formats', array(
+			'aside',
+			'image',
+			'video',
+			'quote',
+			'link',
+			'gallery',
+			'audio',
+		) );
 
+		add_theme_support(
+			'custom-logo',
+			array(
+				'flex-width'  => true,
+				'flex-height' => true,
+			)
+		);
+
+		add_theme_support(
+			'custom-header',
+			array(
+				'width'              => 1920,
+				'default-image'      => get_template_directory_uri() . '/assets/images/00_header_01.jpg',
+				'height'             => 600,
+				'flex-height'        => true,
+				'flex-width'         => true,
+				'default-text-color' => '#232323',
+				'header-text'        => false,
+				'uploads'            => true,
+				'video'              => false,
+			)
+		);
+		// Add theme support for selective refresh for widgets.
 		add_theme_support( 'customize-selective-refresh-widgets' );
-		// Welcome screen
-		if ( is_admin() ) {
-			global $shapely_required_actions, $shapely_recommended_plugins;
-
-			$shapely_recommended_plugins = array(
-				'wordpress-seo'          => array( 'recommended' => true ),
-				'fancybox-for-wordpress' => array( 'recommended' => false ),
-			);
-
-			/*
-			 * id - unique id; required
-			 * title
-			 * description
-			 * check - check for plugins (if installed)
-			 * plugin_slug - the plugin's slug (used for installing the plugin)
-			 *
-			 */
-			$path = WPMU_PLUGIN_DIR . '/shapely-companion/inc/views/shapely-demo-content.php';
-			if ( ! file_exists( $path ) ) {
-				$path = WP_PLUGIN_DIR . '/shapely-companion/inc/views/shapely-demo-content.php';
-				if ( ! file_exists( $path ) ) {
-					$path = false;
-				}
-			}
-
-			$shapely_required_actions = array(
-				array(
-					"id"          => 'shapely-req-ac-install-companion-plugin',
-					"title"       => Shapely_Notify_System::shapely_companion_title(),
-					"description" => Shapely_Notify_System::shapely_companion_description(),
-					"check"       => Shapely_Notify_System::shapely_has_plugin( 'shapely-companion' ),
-					"plugin_slug" => 'shapely-companion'
-				),
-				array(
-					"id"          => 'shapely-req-ac-install-wp-jetpack-plugin',
-					"title"       => Shapely_Notify_System::shapely_jetpack_title(),
-					"description" => Shapely_Notify_System::shapely_jetpack_description(),
-					"check"       => Shapely_Notify_System::shapely_has_plugin( 'jetpack' ),
-					"plugin_slug" => 'jetpack'
-				),
-				array(
-					"id"       => 'shapely-req-import-content',
-					"title"    => esc_html__( 'Import content', 'shapely' ),
-					"external" => $path,
-					"check"    => Shapely_Notify_System::shapely_check_import_req(),
-				),
-
-			);
-
-			require get_template_directory() . '/inc/admin/welcome-screen/welcome-screen.php';
-		}
 	}
-endif;
-add_action( 'after_setup_theme', 'shapely_setup' );
-
-/**
- * Set the content width in pixels, based on the theme's design and stylesheet.
- *
- * Priority 0 to make it available to lower priority callbacks.
- *
- * @global int $content_width
- */
-function shapely_content_width() {
-	$GLOBALS['content_width'] = apply_filters( 'shapely_content_width', 1140 );
 }
-
-add_action( 'after_setup_theme', 'shapely_content_width', 0 );
+add_action( 'after_setup_theme', 'unapp_setup' );
 
 /**
- * Register widget area.
+ * Registers a widget area.
  *
- * @link https://developer.wordpress.org/themes/functionality/sidebars/#registering-a-sidebar
+ * @link https://developer.wordpress.org/reference/functions/register_sidebar/
+ *
+ * @since unapp 1.0
  */
-function shapely_widgets_init() {
-	register_sidebar( array(
-		                  'id'            => 'sidebar-1',
-		                  'name'          => esc_html__( 'Sidebar', 'shapely' ),
-		                  'before_widget' => '<div id="%1$s" class="widget %2$s">',
-		                  'after_widget'  => '</div>',
-		                  'before_title'  => '<h2 class="widget-title">',
-		                  'after_title'   => '</h2>',
-	                  ) );
-
-	register_sidebar( array(
-		                  'id'            => 'sidebar-home',
-		                  'name'          => esc_html__( 'Homepage', 'shapely' ),
-		                  'before_widget' => '<div id="%1$s" class="widget %2$s">',
-		                  'after_widget'  => '</div>',
-		                  'before_title'  => '<h2 class="widget-title">',
-		                  'after_title'   => '</h2>',
-	                  ) );
-
-	for ( $i = 1; $i < 5; $i ++ ) {
-		register_sidebar( array(
-			                  'id'            => 'footer-widget-' . $i,
-			                  'name'          => sprintf( esc_html__( 'Footer Widget %s', 'shapely' ), $i ),
-			                  'description'   => esc_html__( 'Used for footer widget area', 'shapely' ),
-			                  'before_widget' => '<div id="%1$s" class="widget %2$s">',
-			                  'after_widget'  => '</div>',
-			                  'before_title'  => '<h2 class="widget-title">',
-			                  'after_title'   => '</h2>',
-		                  ) );
-	}
-
+function unapp_widgets_init() {
+	register_sidebar(
+		array(
+			'name'          => esc_html__( 'Sidebar', 'unapp' ),
+			'id'            => 'sidebar-1',
+			'description'   => esc_html__( 'Add widgets here to appear in your sidebar.', 'unapp' ),
+			'before_widget' => '<article id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</article>',
+			'before_title'  => '<h2 class="widget-title">',
+			'after_title'   => '</h2>',
+		)
+	);
+	register_sidebar(
+		array(
+			'name'          => esc_html__( 'Footer One', 'unapp' ),
+			'id'            => 'footer-sidebar-1',
+			'description'   => esc_html__( 'Add widgets here to appear in your sidebar.', 'unapp' ),
+			'before_widget' => '<div id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</div>',
+			'before_title'  => '<h4 class="widget-title">',
+			'after_title'   => '</h4>',
+		)
+	);
+	register_sidebar(
+		array(
+			'name'          => esc_html__( 'Footer Two', 'unapp' ),
+			'id'            => 'footer-sidebar-2',
+			'description'   => esc_html__( 'Add widgets here to appear in your sidebar.', 'unapp' ),
+			'before_widget' => '<div id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</div>',
+			'before_title'  => '<h4 class="widget-title">',
+			'after_title'   => '</h4>',
+		)
+	);
+	register_sidebar(
+		array(
+			'name'          => esc_html__( 'Footer Three', 'unapp' ),
+			'id'            => 'footer-sidebar-3',
+			'description'   => esc_html__( 'Add widgets here to appear in your sidebar.', 'unapp' ),
+			'before_widget' => '<div id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</div>',
+			'before_title'  => '<h4 class="widget-title">',
+			'after_title'   => '</h4>',
+		)
+	);
+	register_sidebar(
+		array(
+			'name'          => esc_html__( 'Footer Four', 'unapp' ),
+			'id'            => 'footer-sidebar-4',
+			'description'   => esc_html__( 'Add widgets here to appear in your sidebar.', 'unapp' ),
+			'before_widget' => '<div id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</div>',
+			'before_title'  => '<h4 class="widget-title">',
+			'after_title'   => '</h4>',
+		)
+	);
 }
-
-add_action( 'widgets_init', 'shapely_widgets_init' );
-
-/**
- * Hides the custom post template for pages on WordPress 4.6 and older
- *
- * @param array $post_templates Array of page templates. Keys are filenames, values are translated names.
- *
- * @return array Filtered array of page templates.
- */
-function shapely_exclude_page_templates( $post_templates ) {
-
-	if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
-		unset( $post_templates['page-templates/full-width.php'] );
-		unset( $post_templates['page-templates/no-sidebar.php'] );
-		unset( $post_templates['page-templates/sidebar-left.php'] );
-		unset( $post_templates['page-templates/sidebar-right.php'] );
-	}
-
-	return $post_templates;
-}
-
-add_filter( 'theme_page_templates', 'shapely_exclude_page_templates' );
+add_action( 'widgets_init', 'unapp_widgets_init' );
 
 /**
- * Enqueue scripts and styles.
+ * unapp Enqueue scripts and styles
  */
-function shapely_scripts() {
-	// Add Bootstrap default CSS
-	wp_enqueue_style( 'bootstrap', get_template_directory_uri() . '/inc/css/bootstrap.min.css' );
+function unapp_scripts() {
+	// Theme style
+	wp_enqueue_style( 'unapp-style', get_stylesheet_uri() );
+	// Animation style
+	wp_enqueue_style( 'unapp-animate', get_template_directory_uri() . '/assets/css/animate.css', array(), false, 'all' );
+	// Font Awesome
+	wp_enqueue_style( 'unapp-font-awesome', get_template_directory_uri() . '/assets/css/font-awesome.min.css', array(), false, 'all' );
+	// Icomoon Icon Fonts
+	wp_enqueue_style( 'unapp-icomoon', get_template_directory_uri() . '/assets/css/icomoon.css', array(), false, 'all' );
+	// bootstrap framework
+	wp_enqueue_style( 'unapp-bootstrap', get_template_directory_uri() . '/assets/css/bootstrap.css', array(), false, 'all' );
+	// magnific-popup
+	wp_enqueue_style( 'unapp-magnific-popup', get_template_directory_uri() . '/assets/css/magnific-popup.css', array(), false, 'all' );
+	// owl carousel
+	wp_enqueue_style( 'unapp-owl-carousel-min', get_template_directory_uri() . '/assets/css/owl.carousel.min.css', array(), false, 'all' );
+	wp_enqueue_style( 'unapp-owl-theme-default-min', get_template_directory_uri() . '/assets/css/owl.theme.default.min.css', array(), false, 'all' );
 
-	// Add Font Awesome stylesheet
-	wp_enqueue_style( 'font-awesome', get_template_directory_uri() . '/inc/css/font-awesome.min.css' );
+	//Google Font
+	wp_enqueue_style( 'google-font', esc_url('https://fonts.googleapis.com/css?family=Poppins:300,400,500,600|Nunito:200,300,400'), array(), false, 'all' );
 
-	// Add Google Fonts
-	wp_enqueue_style( 'shapely-fonts', '//fonts.googleapis.com/css?family=Raleway:100,300,400,500,600,700%7COpen+Sans:400,500,600' );
-
-
-	// Add slider CSS
-	wp_enqueue_style( 'flexslider', get_template_directory_uri() . '/inc/css/flexslider.css' );
-
-	//Add custom theme css
-	wp_enqueue_style( 'shapely-style', get_stylesheet_uri() );
-
-	wp_enqueue_script( 'shapely-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20120206', true );
-
-	wp_enqueue_script( 'shapely-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20160115', true );
-
+	// Custom style
+	wp_enqueue_style( 'unapp-main', get_template_directory_uri() . '/assets/css/style.css', array(), false, 'all' );
+	// Load jQuery
+	wp_enqueue_script( 'jQuery' );
+	//modernizr
+	wp_enqueue_script( 'unapp-modernizr-min', get_template_directory_uri() . '/assets/js/modernizr-2.6.2.min.js', array( 'jquery' ), false, true );
+	//respond.min
+	wp_enqueue_script( 'unapp-respond-min', get_template_directory_uri() . '/assets/js/respond.min.js', array( 'jquery' ), false, true );
+	//Jquery easing
+	wp_enqueue_script( 'unapp-jquery-easing', get_template_directory_uri() . '/assets/js/jquery.easing.1.3.js', array( 'jquery' ), false, true );
+	// Bootstrap
+	wp_enqueue_script( 'unapp-bootstrap-min', get_template_directory_uri() . '/assets/js/bootstrap.min.js', array( 'jquery' ), false, true );
+	// Waypoints
+	wp_enqueue_script( 'unapp-waypoints-min', get_template_directory_uri() . '/assets/js/jquery.waypoints.min.js', array( 'jquery' ), false, true );
+	// Stellar
+	wp_enqueue_script( 'unapp-stellar-min', get_template_directory_uri() . '/assets/js/jquery.stellar.min.js', array( 'jquery' ), false, true );
+	// YTPlayer JS
+	wp_enqueue_script( 'unapp-mb-YTPlayer-min', get_template_directory_uri() . '/assets/js/jquery.mb.YTPlayer.min.js', array( 'jquery' ), false, true );
+	// Owl Carousel
+	wp_enqueue_script( 'unapp-owl-carousel-min', get_template_directory_uri() . '/assets/js/owl.carousel.min.js', array( 'jquery' ), false, true );
+	// Magnific Popup JS
+	wp_enqueue_script( 'unapp-magnific-popup-min', get_template_directory_uri() . '/assets/js/jquery.magnific-popup.min.js', array( 'jquery' ), false, true );
+	wp_enqueue_script( 'unapp-magnific-popup-options', get_template_directory_uri() . '/assets/js/magnific-popup-options.js', array( 'jquery' ), false, true );
+	// Countdown JS
+	wp_enqueue_script( 'unapp-countTo', get_template_directory_uri() . '/assets/js/jquery.countTo.js', array( 'jquery' ), false, true );
+	// Theme main JS
+	wp_enqueue_script( 'unapp-main', get_template_directory_uri() . '/assets/js/main.js', array( 'jquery' ), false, true );
+	// reply comments
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
 	}
-
-
-	if ( post_type_exists( 'jetpack-portfolio' ) ) {
-		wp_enqueue_script( 'jquery-masonry' );
-	}
-
-	// Add slider JS
-	wp_enqueue_script( 'flexslider', get_template_directory_uri() . '/js/flexslider.min.js', array( 'jquery' ), '20160222', true );
-
-	if ( is_page_template( 'page-templates/template-home.php' ) ) {
-		wp_enqueue_script( 'shapely-parallax', get_template_directory_uri() . '/js/parallax.min.js', array( 'jquery' ), '20160115', true );
-	}
-	/**
-	 * OwlCarousel Library
-	 */
-	wp_enqueue_script( 'owl.carousel', get_template_directory_uri() . '/js/owl-carousel/owl.carousel.min.js', array( 'jquery' ), '20160115', true );
-	wp_enqueue_style( 'owl.carousel', get_template_directory_uri() . '/js/owl-carousel/owl.carousel.min.css' );
-	wp_enqueue_style( 'owl.carousel.theme', get_template_directory_uri() . '/js/owl-carousel/owl.theme.default.css' );
-
-	wp_enqueue_script( 'shapely-scripts', get_template_directory_uri() . '/js/shapely-scripts.js', array( 'jquery' ), '20160115', true );
-
-	wp_enqueue_style( 'shapely-scss', get_template_directory_uri() . '/assets/css/style.css' );
 }
-
-add_action( 'wp_enqueue_scripts', 'shapely_scripts' );
-
-/**
- * Custom template tags for this theme.
- */
-require get_template_directory() . '/inc/template-tags.php';
+add_action( 'wp_enqueue_scripts', 'unapp_scripts' );
 
 /**
- * Custom functions that act independently of the theme templates.
+ * Registers an editor stylesheet for the theme.
  */
-require get_template_directory() . '/inc/extras.php';
+function unapp_theme_add_editor_styles() {
+    add_editor_style( get_template_directory_uri() . '/assets/css/custom-editor-style.css' );
+}
+add_action( 'admin_init', 'unapp_theme_add_editor_styles' );
 
-/**
- * Add custom section
- */
-require get_template_directory() . '/inc/shapely-documentation/class-customize.php';
+// Require WordPress nav walker menu
+require get_parent_theme_file_path() . '/inc/unapp_navwalker.php';
 
-/**
- * Customizer additions.
- */
-require get_template_directory() . '/inc/customizer.php';
+// Require theme custom functions
+require get_parent_theme_file_path() . '/inc/unapp_functions.php';
 
-/**
- * Load Jetpack compatibility file.
- */
-require get_template_directory() . '/inc/jetpack.php';
+// Require theme custom widget
+require get_parent_theme_file_path() . '/inc/widget/widget_setting.php';
 
-/**
- * Load custom nav walker
- */
-require get_template_directory() . '/inc/navwalker.php';
+// Require theme Demo Data
+require get_parent_theme_file_path() . '/inc/demo-data/demo-import.php';
 
-/**
- * Load Social Navition
- */
-require get_template_directory() . '/inc/socialnav.php';
-
-/**
- * Load related posts
- */
-require get_template_directory() . '/inc/class-shapely-related-posts.php';
-
-/**
- * Load the system checks ( used for notifications )
- */
-require get_template_directory() . '/inc/admin/welcome-screen/notify-system-checks.php';
+// Require Epsilon Cutomizer API
+require get_parent_theme_file_path() . '/inc/class-unapp-autoloader.php';
+if( class_exists( 'Epsilon_Framework' ) ){
+	$unapp = new Unapp();
+}

@@ -1,52 +1,52 @@
 <?php
 /**
- * The main template file.
+ * The main template file
  *
  * This is the most generic template file in a WordPress theme
  * and one of the two required files for a theme (the other being style.css).
  * It is used to display a page when nothing more specific matches a query.
  * E.g., it puts together the home page when no home.php file exists.
  *
- * @link    https://codex.wordpress.org/Template_Hierarchy
+ * @link https://codex.wordpress.org/Template_Hierarchy
  *
- * @package Shapely
+ * @since unapp 1.0
  */
+
 get_header(); ?>
-<?php $layout_class = shapely_get_layout_class();?>
-	<div class="row">
-		<?php
-		if ( $layout_class == 'sidebar-left' ):
-			get_sidebar();
-		endif;
-		?>
-		<div id="primary" class="col-md-8 mb-xs-24 <?php echo esc_attr( $layout_class ); ?>"><?php
-			if ( have_posts() ) :
 
-				if ( is_home() && ! is_front_page() ) : ?>
-					<header>
-						<h1 class="page-title screen-reader-text"><?php esc_html( single_post_title() ); ?></h1>
-					</header>
+    <?php unapp_page_header(); ?>
 
-					<?php
-				endif;
-
-				$layout_type = get_theme_mod( 'blog_layout_view', 'grid' );
-
-				get_template_part( 'template-parts/layouts/blog', $layout_type );
-
-				shapely_pagination();
-
-			else :
-
-				get_template_part( 'template-parts/content', 'none' );
-
-			endif; ?>
-		</div><!-- #primary -->
-		<?php
-		if ( $layout_class == 'sidebar-right' ):
-			get_sidebar();
-		endif;
-		?>
+	<div class="colorlib-blog">
+		<div class="container">
+			<div class="row">
+                <?php
+                    if( have_posts() ) :
+	                    /*
+                         * Include the Post-Format-specific template for the content.
+                         * If you want to override this in a child theme, then include a file
+                         * called content-___.php (where ___ is the Post Format name) and that will be used instead.
+                         */
+                        while ( have_posts() ) :
+                            the_post();
+                            get_template_part( 'template-parts/content', get_post_format() );
+                        endwhile;
+                        ?>
+                        <div class="col-md-12 text-center">
+                            <?php
+                            the_posts_pagination( array(
+	                            'prev_text'  => esc_html__( '&laquo;', 'unapp' ),
+	                            'next_text'  => esc_html__( '&raquo;', 'unapp' ),
+	                            'mid_size'   => 2,
+	                            'screen_reader_text'    => '',
+                            ) );
+                            ?>
+                        </div>
+                        <?php
+                        else:
+	                        get_template_part( 'template-parts/content', 'none' );
+                    endif;
+                ?>
+			</div>
+		</div>
 	</div>
-<?php
-get_footer();
+	<?php get_footer(); ?>
